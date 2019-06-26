@@ -50,8 +50,8 @@ class ProductsModel extends ConnectedProductsModel {
     return _showFavorites;
   }
 
-  Future<Null> addProduct(
-      String title, String description, String image, double price) {
+  Future<bool> addProduct(
+      String title, String description, String image, double price) async {
     _isLoading = true;
     notifyListeners();
     final Map<String, dynamic> productData = {
@@ -63,31 +63,37 @@ class ProductsModel extends ConnectedProductsModel {
       'userEmail': _authenticatedUser.email,
       'userId': _authenticatedUser.id
     };
+    try {
+      final http.Response response = await http.post(
+          'https://flutter-products-a792d.firebaseio.com/products.json',
+          body: json.encode(productData));
 
-    return http
-        .post('https://flutter-products-a792d.firebaseio.com/products.json',
-            body: json.encode(productData))
-        .then(
-      (http.Response response) {
+      if (response.statusCode != 200 && response.statusCode != 201) {
         _isLoading = false;
-
-        final Map<String, dynamic> responseData = json.decode(response.body);
-
-        final Product newProduct = Product(
-            id: responseData['name'],
-            title: title,
-            description: description,
-            image: image,
-            price: price,
-            userEmail: _authenticatedUser.email,
-            userId: _authenticatedUser.id);
-        _products.add(newProduct);
         notifyListeners();
-      },
-    );
+        return false;
+      }
+
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      final Product newProduct = Product(
+          id: responseData['name'],
+          title: title,
+          description: description,
+          image: image,
+          price: price,
+          userEmail: _authenticatedUser.email,
+          userId: _authenticatedUser.id);
+      _products.add(newProduct);
+      notifyListeners();
+      return true;
+    } catch (error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 
-  Future<Null> updateProduct(
+  Future<bool> updateProduct(
       String title, String description, String image, double price) {
     _isLoading = true;
     notifyListeners();
@@ -115,24 +121,33 @@ class ProductsModel extends ConnectedProductsModel {
           price: price,
           userEmail: selectedProduct.userEmail,
           userId: selectedProduct.userId);
-
       _products[selectedProductIndex] = updatedProduct;
       notifyListeners();
+      return true;
+    }).catchError((error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
     });
   }
 
-  void deleteProduct() {
+  Future<bool> deleteProduct() {
     _isLoading = true;
     final deletedProductId = selectedProduct.id;
     _products.removeAt(selectedProductIndex);
     _selProductId = null;
     notifyListeners();
-    http
+    return http
         .delete(
             'https://flutter-products-a792d.firebaseio.com/products/${deletedProductId}.json')
         .then((http.Response response) {
       _isLoading = false;
       notifyListeners();
+      return true;
+    }).catchError((error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
     });
   }
 
@@ -141,7 +156,7 @@ class ProductsModel extends ConnectedProductsModel {
     notifyListeners();
     return http
         .get('https://flutter-products-a792d.firebaseio.com/products.json')
-        .then((http.Response response) {
+        .then<Null>((http.Response response) {
       final List<Product> fetchProductList = [];
       final Map<String, dynamic> productListData = json.decode(response.body);
       if (productListData == null) {
@@ -164,6 +179,11 @@ class ProductsModel extends ConnectedProductsModel {
       _isLoading = false;
       notifyListeners();
       _selProductId = null;
+    }).catchError((error) {
+      print('error caught: $error');
+      _isLoading = false;
+      notifyListeners();
+      return;
     });
   }
 
