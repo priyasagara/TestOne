@@ -19,7 +19,7 @@ class ProductsPage extends StatefulWidget {
 
 class _ProductsPageState extends State<ProductsPage> {
   initState() {
-    widget.model.fetchProducts();
+    widget.model.fetchProducts(onlyForUser: false);
     super.initState();
   }
 

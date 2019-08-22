@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:scoped_model/scoped_model.dart';
+import 'package:map_view/map_view.dart';
 
 import './pages/auth.dart';
 import './pages/products_admin.dart';
@@ -12,6 +13,8 @@ import './models/product.dart';
 main() {
   //debugPaintSizeEnabled = true;
   //debugPaintBaselinesEnabled = true;
+
+  MapView.setApiKey('AIzaSyAlXPXVzpwAH56pHd7072L-H-6cFXgBRos');
   runApp(MyApp());
 }
 
@@ -55,7 +58,7 @@ class _MyAppState extends State<MyApp> {
           },
           onGenerateRoute: (RouteSettings settings) {
             if (!_isAuthenticated) {
-              return MaterialPageRoute(
+              return MaterialPageRoute<bool>(
                   builder: (BuildContext context) => AuthPage());
             }
 
