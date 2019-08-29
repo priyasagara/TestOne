@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import '../widgets/helpers/ensure_visible.dart';
 import '../widgets/form_inputs/location.dart';
+import '../widgets/form_inputs/image.dart';
 import '../models/product.dart';
 import '../scope-models/main.dart';
+import '../models/location_data.dart';
 
 class ProductEditPage extends StatefulWidget {
   @override
@@ -18,7 +21,8 @@ class _ProductEditPageState extends State<ProductEditPage> {
     'title': null,
     'description': null,
     'price': null,
-    'image': 'assets/food1.jpg'
+    'image': 'assets/food1.jpg',
+    'location': null
   };
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _titleFocusNode = FocusNode();
@@ -36,6 +40,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
         _formData['description'],
         _formData['image'],
         _formData['price'],
+        _formData['location'],
       ).then((bool success) {
         if (success) {
           Navigator.pushReplacementNamed(context, '/')
@@ -63,6 +68,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
         _formData['description'],
         _formData['image'],
         _formData['price'],
+        _formData['location'],
       ).then((_) => Navigator.pushReplacementNamed(context, '/products')
           .then((_) => setSelectedProduct(null)));
     }
@@ -125,13 +131,16 @@ class _ProductEditPageState extends State<ProductEditPage> {
         return model.isLoading
             ? Center(child: CircularProgressIndicator())
             : RaisedButton(
-                child: Text('Save'),
+                child: Text(
+                  'Save',
+                  style: TextStyle(color: Colors.white),
+                ),
                 onPressed: () => _submitForm(
                     model.addProduct,
                     model.updateProduct,
                     model.selectProduct,
                     model.selectedProductIndex),
-                color: Theme.of(context).primaryColor,
+                color: Theme.of(context).accentColor,
               );
       },
     );
@@ -158,7 +167,11 @@ class _ProductEditPageState extends State<ProductEditPage> {
                   SizedBox(
                     height: 10.0,
                   ),
-                  LocationInput(),
+                  //LocationInput(_setLocation),
+                  // SizedBox(
+                  //   height: 10.0,
+                  // ),
+                  ImageInput(),
                   SizedBox(
                     height: 10.0,
                   ),
@@ -166,6 +179,10 @@ class _ProductEditPageState extends State<ProductEditPage> {
                 ],
               ))),
     );
+  }
+
+  void _setLocation(LocationData locData) {
+    _formData['location'] = locData;
   }
 
   @override

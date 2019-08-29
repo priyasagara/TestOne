@@ -46,7 +46,7 @@ class _MyAppState extends State<MyApp> {
         child: MaterialApp(
           theme: ThemeData(
               primarySwatch: Colors.amber,
-              accentColor: Colors.deepPurple,
+              accentColor: Colors.deepOrange,
               brightness: Brightness.light,
               buttonColor: Colors.red),
           //home: AuthPage(),
